@@ -1,6 +1,6 @@
 import React from "react";
 import InputMovement from "../components/InputMovement";
-// import ListMovements from "../components/ListMovements";
+import ListMovements from "../components/ListMovements";
 import { Container } from "react-bootstrap";
 
 function Movements() {
@@ -9,7 +9,7 @@ function Movements() {
       <div className="App">
         <h1>Movements</h1>
         <InputMovement />
-        {/* <ListMovements /> */}
+        <ListMovements />
       </div>
     </Container>
   );
