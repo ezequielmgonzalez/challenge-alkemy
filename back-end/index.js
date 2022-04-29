@@ -101,6 +101,21 @@ app.get("/movements/:id", async (req, res) => {
   }
 });
 
+// Update a movement
+app.put("/movements/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { concept, amount, dateM, typeM } = req.body;
+    const updateMovement = await pool.query(
+      "UPDATE movement SET concept = $1, amount = $2, dateM = $3, typeM = $4 WHERE movement_id = $5",
+      [concept, amount, dateM, typeM, id]
+    );
+    res.json("Movement updated!");
+  } catch (e) {
+    console.error(e.message);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
