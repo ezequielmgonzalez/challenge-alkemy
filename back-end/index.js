@@ -43,6 +43,20 @@ app.get("/movements", async (req, res) => {
   }
 });
 
+// Get only selected type of movements
+app.get("/movements/type/:t", async (req, res) => {
+  try {
+    const { t } = req.params;
+    const allSelected = await pool.query(
+      "SELECT * FROM movement WHERE typem = $1 ORDER BY movement_id DESC",
+      [t]
+    );
+    res.json(allSelected.rows);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
