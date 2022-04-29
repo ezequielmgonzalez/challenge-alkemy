@@ -87,6 +87,20 @@ app.get("/movements/balance", async (req, res) => {
   }
 });
 
+// Get a movement
+app.get("/movements/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const movement = await pool.query(
+      "SELECT * FROM movement WHERE movement_id = $1",
+      [id]
+    );
+    res.json(movement.rows[0]);
+  } catch (e) {
+    console.error(e.message);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
