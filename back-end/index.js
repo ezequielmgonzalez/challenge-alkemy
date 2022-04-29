@@ -116,6 +116,20 @@ app.put("/movements/:id", async (req, res) => {
   }
 });
 
+// Delete a movement
+app.delete("/movements/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleteMovement = await pool.query(
+      "DELETE FROM movement WHERE movement_id = $1",
+      [id]
+    );
+    res.json("Movement deleted");
+  } catch (e) {
+    console.error(e.message);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
