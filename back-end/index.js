@@ -31,6 +31,18 @@ app.post("/movements", async (req, res) => {
   }
 });
 
+// Get all movements
+app.get("/movements", async (req, res) => {
+  try {
+    const allMovements = await pool.query(
+      "SELECT * FROM movement ORDER BY movement_id DESC"
+    );
+    res.json(allMovements.rows);
+  } catch (e) {
+    console.error(e.message);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
