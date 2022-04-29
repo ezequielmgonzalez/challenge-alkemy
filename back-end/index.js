@@ -57,6 +57,20 @@ app.get("/movements/type/:t", async (req, res) => {
   }
 });
 
+// Get last 10 (quantity) movements
+app.get("/movements/last/:q", async (req, res) => {
+  try {
+    const { q } = req.params;
+    const allMovements = await pool.query(
+      "SELECT * FROM movement ORDER BY movement_id DESC LIMIT $1",
+      [q]
+    );
+    res.json(allMovements.rows);
+  } catch (e) {
+    console.error(e.message);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
