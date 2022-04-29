@@ -71,6 +71,22 @@ app.get("/movements/last/:q", async (req, res) => {
   }
 });
 
+// Get total balance from all movements
+app.get("/movements/balance", async (req, res) => {
+  try {
+    const allIncomes = await pool.query(
+      "SELECT SUM(amount) FROM movement WHERE typem='I'"
+    );
+    const allOutcomes = await pool.query(
+      "SELECT SUM(amount) FROM movement WHERE typem='O'"
+    );
+    const totalBalance = allIncomes.rows[0].sum - allOutcomes.rows[0].sum;
+    res.json(totalBalance);
+  } catch (e) {
+    console.error(e.message);
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
