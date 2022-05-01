@@ -11,16 +11,37 @@ function ModalMovement({
   list = {
     amount: 0,
     concept: "",
-    typem: "I",
-    datem: new Date().toISOString(),
+    category: {},
+    categoryId: 0,
+    typeM: "I",
+    dateM: new Date().toISOString(),
   },
 }) {
   const [show, setShow] = React.useState(false);
 
   const [amount, setAmount] = React.useState(list.amount);
   const [concept, setConcept] = React.useState(list.concept);
-  const [typeM, setTypeM] = React.useState(list.typem);
-  const [dateM, setDateM] = React.useState(list.datem.substring(0, 10));
+  const [category, setCategory] = React.useState(list.category);
+  const [categoryId] = React.useState(list.categoryId);
+  const [typeM, setTypeM] = React.useState(list.typeM);
+  const [dateM, setDateM] = React.useState(list.dateM.substring(0, 10));
+
+  const [categories, setCategories] = React.useState([]);
+
+  // Gets all the categories
+  const getCategories = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/categories");
+      const jsonData = await response.json();
+      setCategories(jsonData);
+    } catch (e) {
+      console.error(e.message);
+    }
+  };
+
+  React.useEffect(() => {
+    getCategories();
+  }, []);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -49,7 +70,9 @@ function ModalMovement({
         </Modal.Header>
         <Modal.Body>
           <Form
-            onSubmit={(e) => onSubmitForm(e, { amount, concept, typeM, dateM })}
+            onSubmit={(e) =>
+              onSubmitForm(e, { amount, concept, category, typeM, dateM })
+            }
           >
             <Form.Label>Amount</Form.Label>
             <InputGroup className="mb-3">
@@ -61,7 +84,16 @@ function ModalMovement({
                 aria-label="Amount (to the nearest dollar)"
               />
             </InputGroup>
-
+            <Form.Label>Category</Form.Label>
+            <Form.Select
+              className="mb-3"
+              defaultValue={categoryId}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {categories.map((category) => (
+                <option value={category.category_id}>{category.name}</option>
+              ))}
+            </Form.Select>
             <Form.Label>Concept</Form.Label>
             <InputGroup className="mb-3">
               <FormControl

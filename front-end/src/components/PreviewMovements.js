@@ -11,6 +11,7 @@ const PreviewMovements = () => {
       const response = await fetch("http://localhost:5000/movements/last/10");
       const jsonData = await response.json();
       setList(jsonData);
+      console.log(list);
     } catch (e) {
       console.error(e.message);
     }
@@ -37,12 +38,12 @@ const PreviewMovements = () => {
         <tbody>
           {list.map((list) => (
             <tr key={list.movement_id}>
-              <td className={list.typem === "O" ? "negative" : "positive"}>
-                {list.typem === "O" ? "-" : ""}${list.amount}
+              <td className={list.typeM === "O" ? "negative" : "positive"}>
+                {list.typeM === "O" ? "-" : ""}${list.amount}
               </td>
               <td>{list.concept}</td>
-              <td>{list.datem.substring(0, 10)}</td>
-              <td>{list.typem === "O" ? "Outcome" : "Income"}</td>
+              <td>{list.dateM.substring(0, 10)}</td>
+              <td>{list.typeM === "O" ? "Outcome" : "Income"}</td>
             </tr>
           ))}
         </tbody>
