@@ -5,7 +5,8 @@ CREATE TABLE movement (
     amount REAL NOT NULL,
     concept VARCHAR(255) NOT NULL,
     dateM DATE NOT NULL,
-    typeM CHAR NOT NULL
+    typeM CHAR NOT NULL,
+    category VARCHAR(50) NOT NULL,
 );
 
 ALTER TABLE movement OWNER TO testuser;

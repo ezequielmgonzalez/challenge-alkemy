@@ -1,8 +1,15 @@
 const express = require("express");
 const path = require("path");
-const pool = require("./database/db");
+// const pool = require("./database/db");
 const cors = require("cors");
 
+const sequelize = require("./database/database.js");
+
+// Chequear si puedo cambiarlo:
+const { Op } = require("sequelize");
+
+const Movement = require("./models/Movement.js");
+const Category = require("./models/Category.js");
 const app = express();
 
 // Serve the static files from the React app
@@ -16,121 +23,248 @@ app.use(express.json());
 
 // Routes
 
-// Create a movement
+// Create a movement (sequelize)
 app.post("/movements", async (req, res) => {
   try {
-    const { concept, amount, dateM, typeM } = req.body;
-    const newMovement = await pool.query(
-      "INSERT INTO movement (concept, amount, dateM, typeM) VALUES ($1, $2, $3, $4) RETURNING *",
-      [concept, amount, dateM, typeM]
-    );
+    const { concept, amount, dateM, typeM, categoryId } = req.body;
+    const newMovement = await Movement.create({
+      concept,
+      amount,
+      dateM,
+      typeM,
+      categoryId,
+    });
 
-    res.json(newMovement.rows[0]);
+    res.json(newMovement);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Get all movements
+// Get filtered movements (sequelize)
+app.get("/movements/filters", async (req, res) => {
+  try {
+    filters = req.query;
+    let conditions = {};
+    if (filters.type) {
+      conditions["typeM"] = filters.type;
+    }
+    if (filters.category) {
+      conditions["categoryId"] = filters.category;
+    }
+    const filteredMovements = await Movement.findAll({
+      where: {
+        [Op.and]: {
+          // Both filters: "SELECT * FROM movement WHERE typem = $1 AND category = $2 ORDER BY movement_id DESC"
+          // Only type filter: "SELECT * FROM movement WHERE typem = $1 ORDER BY movement_id DESC"
+          // typeM: filters.type,
+          // Only category filter: "SELECT * FROM movement WHERE category = $1 ORDER BY movement_id DESC",
+          // categoryId: filters.category,
+          ...conditions,
+        },
+      },
+      include: [
+        {
+          model: Category,
+          attributes: ["name"],
+        },
+      ],
+      order: [["movement_id", "DESC"]],
+    });
+    res.json(filteredMovements);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+// Gel all movements (sequelize)
 app.get("/movements", async (req, res) => {
   try {
-    const allMovements = await pool.query(
-      "SELECT * FROM movement ORDER BY movement_id DESC"
-    );
-    res.json(allMovements.rows);
+    const allMovements = await Movement.findAll({
+      include: [
+        {
+          model: Category,
+          attributes: ["name"],
+        },
+      ],
+    });
+    res.json(allMovements);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Get only selected type of movements
-app.get("/movements/type/:t", async (req, res) => {
-  try {
-    const { t } = req.params;
-    const allSelected = await pool.query(
-      "SELECT * FROM movement WHERE typem = $1 ORDER BY movement_id DESC",
-      [t]
-    );
-    res.json(allSelected.rows);
-  } catch (e) {
-    console.error(e);
-  }
-});
-
-// Get last 10 (quantity) movements
+// Get last 10 (quantity) movements (sequelize)
 app.get("/movements/last/:q", async (req, res) => {
   try {
     const { q } = req.params;
-    const allMovements = await pool.query(
-      "SELECT * FROM movement ORDER BY movement_id DESC LIMIT $1",
-      [q]
-    );
-    res.json(allMovements.rows);
+    // SELECT * FROM movement ORDER BY movement_id DESC LIMIT {q}
+    const allMovements = await Movement.findAll({
+      attributes: ["concept", "amount", "dateM", "typeM"],
+      include: [
+        {
+          model: Category,
+          attributes: ["name"],
+        },
+      ],
+      order: [["movement_id", "DESC"]],
+      limit: q,
+    });
+    res.json(allMovements);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Get total balance from all movements
+// Get total balance from all movements (sequelize)
 app.get("/movements/balance", async (req, res) => {
   try {
-    const allIncomes = await pool.query(
-      "SELECT SUM(amount) FROM movement WHERE typem='I'"
-    );
-    const allOutcomes = await pool.query(
-      "SELECT SUM(amount) FROM movement WHERE typem='O'"
-    );
-    const totalBalance = allIncomes.rows[0].sum - allOutcomes.rows[0].sum;
+    const allIncomes = await Movement.findAll({
+      attributes: [[sequelize.fn("SUM", sequelize.col("amount")), "total"]],
+      where: {
+        typeM: "I",
+      },
+    });
+    const allOutcomes = await Movement.findAll({
+      attributes: [[sequelize.fn("SUM", sequelize.col("amount")), "total"]],
+      where: {
+        typeM: "O",
+      },
+    });
+    const totalBalance =
+      allIncomes[0].dataValues.total - allOutcomes[0].dataValues.total;
     res.json(totalBalance);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Get a movement
+// Get a movement (sequelize)
 app.get("/movements/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const movement = await pool.query(
-      "SELECT * FROM movement WHERE movement_id = $1",
-      [id]
-    );
-    res.json(movement.rows[0]);
+    const movement = await Movement.findByPk(id);
+
+    if (!movement)
+      return res.status(404).json({ message: "Movement does not exist" });
+
+    res.json(movement);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Update a movement
+// Update a movement (sequelieze)
 app.put("/movements/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { concept, amount, dateM, typeM } = req.body;
-    const updateMovement = await pool.query(
-      "UPDATE movement SET concept = $1, amount = $2, dateM = $3, typeM = $4 WHERE movement_id = $5",
-      [concept, amount, dateM, typeM, id]
-    );
-    res.json("Movement updated!");
+    const { concept, amount, dateM, categoryId } = req.body;
+    const updateMovement = await Movement.findByPk(id);
+    updateMovement.concept = concept;
+    updateMovement.amount = amount;
+    updateMovement.dateM = dateM;
+    updateMovement.categoryId = categoryId;
+    await updateMovement.save();
+
+    res.json(updateMovement);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Delete a movement
+// Delete a movement (sequelize)
 app.delete("/movements/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deleteMovement = await pool.query(
-      "DELETE FROM movement WHERE movement_id = $1",
-      [id]
-    );
-    res.json("Movement deleted");
+    await Movement.destroy({
+      where: {
+        movement_id: id,
+      },
+    });
+    return res.sendStatus(204);
   } catch (e) {
-    console.error(e.message);
+    return res.status(500).json({ message: e.message });
   }
 });
 
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+// Create a category (sequelize)
+app.post("/categories", async (req, res) => {
+  try {
+    const { name } = req.body;
+    const newCategory = await Category.create({
+      name,
+    });
+
+    res.json(newCategory);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
 });
+
+// Gel all categories (sequelize)
+app.get("/categories", async (req, res) => {
+  try {
+    const allCategories = await Category.findAll();
+    res.json(allCategories);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+// Get a category (sequelize)
+app.get("/categories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const category = await Category.findByPk(id);
+
+    if (!category)
+      return res.status(404).json({ message: "Category does not exist" });
+
+    res.json(category);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+// Update a category (sequelieze)
+app.put("/categories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const updateCategory = await Category.findByPk(id);
+    updateCategory.name = name;
+    await updateCategory.save();
+
+    res.json(updateCategory);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+// Delete a category (sequelize)
+app.delete("/categories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Category.destroy({
+      where: {
+        category_id: id,
+      },
+    });
+    return res.sendStatus(204);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+async function main() {
+  try {
+    await sequelize.sync({ force: false });
+    const port = process.env.PORT || 5000;
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+main();
