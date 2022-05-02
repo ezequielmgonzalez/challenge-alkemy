@@ -28,11 +28,11 @@ Two tables are used in the database, one to store the movements and the other fo
 #### Creating database
 
 First, we run in the server directory: \
-`createdb budgetwisedb` 
+`createdb challengedb` 
 
 If it doesn't work, use this one: \
 `sudo -u postgres psql` \
-`CREATE DATABASE budgetWiseDb;` 
+`CREATE DATABASE challengedb;` 
 
 And get out with: \
 `\q`
