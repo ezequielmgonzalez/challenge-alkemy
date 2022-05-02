@@ -1,6 +1,21 @@
 # challenge-alkemy
 Second version for Alkemy's fullstack challenge. App that allows to manage (adding, editing and deleting) money operations of a user. 
 
+![image](https://user-images.githubusercontent.com/90068543/166178166-f1d81d9d-3fd6-4e83-8b39-52dd7e210fbe.png)
+![image](https://user-images.githubusercontent.com/90068543/166178177-a6c8c798-d8f6-432a-ba20-c04c1c399705.png)
+
+
+This app has been made as an update of a previous release of mine for Alkemy:
+[Previous front-end repo](https://github.com/ezequielmgonzalez/client-budget-wise)
+[Previous back-end repo](https://github.com/ezequielmgonzalez/server-budget)
+I thought it was important to take advantage of Agile Methodologies so the first idea was to organize the changes for the project using [Trello](https://trello.com/):
+
+![trello_img](https://user-images.githubusercontent.com/90068543/166172358-c1d9da1a-5645-4316-aab2-08960a3c617a.png)
+
+On [this dashboard](https://trello.com/b/z0yaGDeg/challenge-alkemy) I organized with cards all the tasks I had to do to change the app. These cards changed status depending if they were not done, were in process or were finished.
+
+After organizing the Trello cards, I began to make them starting from the unification of both repositories I had before.
+
 ## Back-end
 Developed in [Node.js](https://nodejs.org/es/about/) together with the [Express](https://expressjs.com/) framework. Database in PostgreSQL, connected via the ORM [Sequelize](https://sequelize.org/).
 
@@ -22,14 +37,6 @@ If it doesn't work, use this one: \
 And get out with: \
 `\q`
 
-Then, run the following command to setup the PostgresSQL database schema: 
-
-If you run the first command:
-`psql -d budgetwisedb < database.sql`
-
-If it didn't work:
-`sudo -u postgres psql -d budgetwisedb < database.sql`
-
 #### Starting server
 
 In the project directory, you can run:
@@ -46,6 +53,11 @@ This API exposes URLs that return JSON data. Below is the list of endpoints:
 - Get a movement: GET request to /movements/:id where "id" is a number that identifies the specific movement.
 - Update a movement: PUT request to /movements/:id where "id" is a number that identifies the specific movement.
 - Delete a movement: DELETE request to /movements
+- Create a category: POST request to /categories
+- Get all categories: GET request to /categories
+- Get a category: GET request to /categories/:id where "id" is a number that identifies the specific category.
+- Update a category: PUT request to /categories/:id where "id" is a number that identifies the specific category.
+- Delete a category: DELETE request to /categories
 All this endpoints interact with the local database where it can be consulted or modified depending on which one is used.
 
 ## Front-end
