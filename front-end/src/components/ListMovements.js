@@ -2,7 +2,6 @@ import React from "react";
 import { Table, Button, Form } from "react-bootstrap";
 import EditMovement from "./EditMovement";
 import { FaTrashAlt } from "react-icons/fa";
-// import TableRow from "./TableRow";
 
 // Creates a table with the requested movements (either all or filtered)
 const ListMovements = () => {
@@ -126,6 +125,7 @@ const ListMovements = () => {
               <td>{list.concept}</td>
               <td>{list.dateM.substring(0, 10)}</td>
               <td>{list.typeM === "O" ? "Outcome" : "Income"}</td>
+              {console.log(list)}
               <td>{list.category.name}</td>
               <td>
                 <EditMovement list={list} />
@@ -139,11 +139,6 @@ const ListMovements = () => {
                 </Button>
               </td>
             </tr>
-            // <TableRow
-            //   complete="true"
-            //   list={list}
-            //   onRemove={() => deleteMovement(list.movement_id)}
-            // />
           ))}
         </tbody>
       </Table>

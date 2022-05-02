@@ -12,7 +12,7 @@ function ModalMovement({
     amount: 0,
     concept: "",
     category: {},
-    categoryId: 0,
+    categoryId: 1,
     typeM: "I",
     dateM: new Date().toISOString(),
   },
@@ -22,7 +22,7 @@ function ModalMovement({
   const [amount, setAmount] = React.useState(list.amount);
   const [concept, setConcept] = React.useState(list.concept);
   const [category, setCategory] = React.useState(list.category);
-  const [categoryId] = React.useState(list.categoryId);
+  const [categoryId, setCategoryId] = React.useState(list.categoryId);
   const [typeM, setTypeM] = React.useState(list.typeM);
   const [dateM, setDateM] = React.useState(list.dateM.substring(0, 10));
 
@@ -70,9 +70,10 @@ function ModalMovement({
         </Modal.Header>
         <Modal.Body>
           <Form
-            onSubmit={(e) =>
-              onSubmitForm(e, { amount, concept, category, typeM, dateM })
-            }
+            onSubmit={(e) => {
+              console.log("ONSUBMITTT");
+              onSubmitForm(e, { amount, concept, categoryId, typeM, dateM });
+            }}
           >
             <Form.Label>Amount</Form.Label>
             <InputGroup className="mb-3">
@@ -88,7 +89,10 @@ function ModalMovement({
             <Form.Select
               className="mb-3"
               defaultValue={categoryId}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                console.log(e.target);
+                setCategoryId(e.target.value);
+              }}
             >
               {categories.map((category) => (
                 <option value={category.category_id}>{category.name}</option>

@@ -9,6 +9,7 @@ const InputMovement = () => {
     // Prevent from refresh
     e.preventDefault();
     try {
+      console.log("LLEGOOOOOOOOO");
       // const body = { amount, concept, typeM, dateM };
       await fetch("http://localhost:5000/movements", {
         method: "POST",
@@ -16,7 +17,7 @@ const InputMovement = () => {
         body: JSON.stringify(movement),
       });
       //  Once the response has been sent, itś going to refresh and show the changes
-      window.location = "/";
+      window.location = "/movements";
     } catch (err) {
       console.error(err.message);
     }
