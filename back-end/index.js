@@ -28,6 +28,7 @@ app.use(express.json());
 app.post("/movements", async (req, res) => {
   try {
     const { concept, amount, dateM, typeM, categoryId } = req.body;
+    console.log(req.body);
     const newMovement = await Movement.create({
       concept,
       amount,
