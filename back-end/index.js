@@ -10,6 +10,7 @@ const { Op } = require("sequelize");
 
 const Movement = require("./models/Movement.js");
 const Category = require("./models/Category.js");
+const inserts = require("./database/inserts.js");
 const app = express();
 
 // Serve the static files from the React app
@@ -258,7 +259,10 @@ app.delete("/categories/:id", async (req, res) => {
 
 async function main() {
   try {
-    await sequelize.sync({ force: false });
+    // with sync and "force: true", Sequelize forces the creation of tables even if they are already created (i.e. overwrites them).
+    // you can put force on false so the creation of tables only happens if those aren't created yet.
+    await sequelize.sync({ force: true });
+    await inserts();
     const port = process.env.PORT || 5000;
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
